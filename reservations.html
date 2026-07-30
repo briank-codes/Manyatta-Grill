@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Book a table or learn about upcoming events at Manyatta Grill." />
+  <title>Events & Reservations - Manyatta Grill</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="logo-area">
+        <img src="manyattagrillogo.jpeg" alt="Manyatta Grill logo" class="logo-img" width="44" height="44" />
+        <div class="logo-text-block">
+          <div class="brand-name">Manyatta Grill</div>
+          <div class="brand-tagline">Nyama Choma & Cultural Dining</div>
+        </div>
+      </a>
+      <nav id="main-nav">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="menu.html">Menu</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="reviews.html">Reviews</a></li>
+          <li class="active"><a href="reservations.html" aria-current="page">Events</a></li>
+          
+        </ul>
+      </nav>
+      <div class="nav-cta">
+        <button class="search-btn" type="button" aria-label="Search">🔍</button>
+        <a href="reservations.html" class="btn-primary">Reserve a Table</a>
+        <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-nav">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+  <section id="reservations">
+    <div class="reservations-inner">
+      <div>
+        <div class="section-tag">Coming Up</div>
+        <h2 class="section-title">Events & Reservations</h2>
+        <p class="section-body">Join us for live music, cultural celebrations, and private dining experiences. Reserve early to claim the best seating.</p>
+        <div class="events-list">
+          <div class="event-item">
+            <div class="event-date"><div class="day">20</div><div class="month">Jun</div></div>
+            <div class="event-info"><h4>🎶 Live Benga Night</h4><p>Traditional music paired with unlimited nyama choma platters.</p></div>
+          </div>
+          <div class="event-item">
+            <div class="event-date"><div class="day">28</div><div class="month">Jun</div></div>
+            <div class="event-info"><h4>🎉 Cultural Food Festival</h4><p>Celebrating Kenyan dishes from every region with family-friendly dining.</p></div>
+          </div>
+          <div class="event-item">
+            <div class="event-date"><div class="day">04</div><div class="month">Jul</div></div>
+            <div class="event-info"><h4>🍖 Choma Championship</h4><p>Watch chefs compete for the best grill and vote for your favorite.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="reservation-form">
+        <h3>Reserve a Table</h3>
+        <form id="reservation-form" action="/api/reservation" method="POST">
+          <div class="form-row">
+            <div class="form-group"><label>Full Name</label><input type="text" name="name" placeholder="John Kamau" required /></div>
+            <div class="form-group"><label>Phone Number</label><input type="tel" name="phone" placeholder="+254 700 000 000" required /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Email Address</label><input type="email" name="email" placeholder="john.kamau@example.com" required /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Date</label><input type="date" name="date" required /></div>
+            <div class="form-group"><label>Time</label><input type="time" name="time" required /></div>
+          </div>
+          <div class="form-group"><label>Number of Guests</label><select name="guests"><option>1–2 People</option><option>3–5 People</option><option>6–10 People</option><option>10+ (Private Event)</option></select></div>
+          <div class="form-group"><label>Special Requests</label><textarea name="requests" placeholder="Any dietary needs, occasion details, etc..."></textarea></div>
+          <button class="btn-primary" type="submit">Confirm Reservation →</button>
+        </form>
+      </div>
+    </div>
+  </section>
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="brand-name">Manyatta Grill</div>
+          <div class="brand-tagline">Nyama Choma & Cultural Dining</div>
+          <p>Serving authentic Kenyan grilled meats and cultural dishes in the heart of Nairobi since 2014.</p>
+          <div class="footer-socials">
+            <a href="https://facebook.com/manyattagrill" class="social-link" target="_blank" rel="noreferrer">f</a>
+            <a href="https://twitter.com/manyattagrill" class="social-link" target="_blank" rel="noreferrer">𝕏</a>
+            <a href="https://instagram.com/manyattagrill" class="social-link" target="_blank" rel="noreferrer">📷</a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="menu.html">Menu</a></li>
+            <li><a href="gallery.html">Gallery</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="reservations.html">Reservations</a></li>
+            <li><a href="reservations.html">Private Events</a></li>
+            <li><a href="menu.html">Order Online</a></li>
+            <li><a href="contact.html">Catering</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="tel:+254797538000">+254 797 538 000</a></li>
+            <li><a href="mailto:info@manyattagrill.com">info@manyattagrill.com</a></li>
+            <li><a href="contact.html">123 Zuri Street, Nairobi</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Manyatta Grill Demo Site. All rights reserved.</p>
+        <p>Built with ❤ by <a href="#">Zuri Creative Designs</a></p>
+      </div>
+    </div>
+  </footer>
+  <script src="script.js"></script>
+</body>
+</html>

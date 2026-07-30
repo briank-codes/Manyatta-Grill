@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – Manyatta Grill</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root {
+      --red:#D94F2B; --red-dk:#B33A1A; --cream:#FDF6EE;
+      --dark:#1A1208; --tan:#E8D5B0; --tan-lt:#F5EAD8;
+      --gray:#6B5E4E; --gray-lt:#9A8D7E;
+      --sidebar-w: 260px;
+    }
+    body { margin:0; background:#f4ede2; font-family:'Lato',sans-serif; }
+
+    /* ── LAYOUT ── */
+    .dash-shell { display:flex; min-height:100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--dark);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform .3s;
+    }
+    .sidebar-brand {
+      display: flex; align-items: center; gap: .85rem;
+      padding: 1.5rem 1.25rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sidebar-brand img { width:42px; height:42px; border-radius:8px; object-fit:cover; }
+    .sidebar-brand-text .name { color:#fff; font-weight:700; font-size:.95rem; }
+    .sidebar-brand-text .sub  { color:#9A8D7E; font-size:.7rem; letter-spacing:.07em; }
+
+    .sidebar-user {
+      display: flex; align-items: center; gap: .75rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .sidebar-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--red); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; flex-shrink: 0;
+    }
+    .sidebar-user-info .user-name { color:#fff; font-size:.88rem; font-weight:700; }
+    .sidebar-user-info .user-role {
+      display: inline-block;
+      font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing:.07em;
+      padding: .15rem .5rem; border-radius: 4px;
+      margin-top:.2rem;
+    }
+    .role-pill-ADMIN    { background:rgba(217,79,43,.2);  color:#ff9980; }
+    .role-pill-STAFF    { background:rgba(139,105,20,.2); color:#d4a830; }
+    .role-pill-CUSTOMER { background:rgba(74,124,89,.2);  color:#7dcf96; }
+
+    .sidebar-nav { flex:1; padding: 1rem 0; }
+    .sidebar-section {
+      padding: .5rem 1.25rem .25rem;
+      font-size:.63rem; font-weight:700; letter-spacing:.1em;
+      text-transform:uppercase; color:#5A4E3E;
+    }
+    .sidebar-link {
+      display: flex; align-items: center; gap: .75rem;
+      padding: .7rem 1.25rem;
+      color: #9A8D7E;
+      cursor: pointer;
+      transition: all .15s;
+      border-left: 3px solid transparent;
+      font-size: .88rem;
+    }
+    .sidebar-link:hover { color:#e8d5b0; background:rgba(255,255,255,.04); }
+    .sidebar-link.active { color:#fff; background:rgba(217,79,43,.12); border-left-color:var(--red); }
+    .sidebar-link .icon { font-size:1rem; width:20px; text-align:center; flex-shrink:0; }
+    .sidebar-link .badge { margin-left:auto; background:var(--red); color:#fff; border-radius:99px; padding:.1rem .5rem; font-size:.68rem; font-weight:700; }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .sidebar-logout {
+      display: flex; align-items: center; gap: .75rem;
+      color: #9A8D7E; cursor: pointer; font-size:.88rem;
+      padding: .6rem 0; transition: color .15s;
+    }
+    .sidebar-logout:hover { color:#ff7a61; }
+
+    /* ── MAIN ── */
+    .dash-main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+    .dash-topbar {
+      background: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ede3d6;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .dash-topbar h1 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); }
+    .topbar-actions { display:flex; align-items:center; gap:1rem; }
+    .topbar-notif {
+      width:38px; height:38px; border-radius:50%;
+      background: #f4ede2; border: none; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; position:relative; transition:background .2s;
+    }
+    .topbar-notif:hover { background:#e8d5b0; }
+    .notif-dot { position:absolute; top:6px; right:6px; width:8px; height:8px; background:var(--red); border-radius:50%; }
+    .topbar-btn {
+      padding:.5rem 1.1rem;
+      background:var(--red); color:#fff; border:none;
+      border-radius:7px; font-family:'Lato',sans-serif;
+      font-size:.85rem; font-weight:700; cursor:pointer;
+      transition:background .2s;
+    }
+    .topbar-btn:hover { background:var(--red-dk); }
+
+    /* CONTENT */
+    .dash-content { padding: 2rem; }
+
+    /* PANELS */
+    .dash-panel { display:none; }
+    .dash-panel.active { display:block; }
+
+    /* STAT CARDS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1.25rem;
+      border: 1px solid #ede3d6;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 4px; height: 100%;
+      background: var(--accent, var(--red));
+    }
+    .stat-label { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--gray); margin-bottom:.5rem; }
+    .stat-value { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--dark); line-height:1; }
+    .stat-delta { font-size:.78rem; color:#48bb78; margin-top:.3rem; }
+    .stat-delta.down { color:#e53e3e; }
+    .stat-icon { position:absolute; top:1rem; right:1.25rem; font-size:1.5rem; opacity:.2; }
+
+    /* TABLE */
+    .dash-table-wrap {
+      background:#fff; border-radius:12px; border:1px solid #ede3d6; overflow:hidden; margin-bottom:1.5rem;
+    }
+    .dash-table-head {
+      padding: 1rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #ede3d6;
+    }
+    .dash-table-head h3 { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--dark); }
+    .dash-table-head .table-actions { display:flex; gap:.6rem; }
+    .tbl-btn {
+      padding:.4rem .9rem; border-radius:6px; font-size:.78rem; font-weight:700;
+      cursor:pointer; border:1px solid var(--tan); background:#fff; color:var(--gray);
+      transition:all .15s;
+    }
+    .tbl-btn:hover { background:var(--tan-lt); }
+    .tbl-btn.primary { background:var(--red); color:#fff; border-color:var(--red); }
+    .tbl-btn.primary:hover { background:var(--red-dk); }
+
+    table { width:100%; border-collapse:collapse; }
+    th { padding:.75rem 1.5rem; text-align:left; font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--gray); border-bottom:1px solid #ede3d6; background:#faf6f1; }
+    td { padding:.85rem 1.5rem; border-bottom:1px solid #f5f0ea; font-size:.88rem; color:var(--dark); }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:#faf6f1; }
+
+    .badge {
+      display:inline-flex; align-items:center; gap:.3rem;
+      padding:.2rem .65rem; border-radius:99px;
+      font-size:.72rem; font-weight:700;
+    }
+    .badge-green  { background:#f0fff4; color:#276749; }
+    .badge-red    { background:#fff5f5; color:#c53030; }
+    .badge-amber  { background:#fffbeb; color:#92400e; }
+    .badge-blue   { background:#ebf8ff; color:#2a69ac; }
+    .badge-gray   { background:#f7f3ee; color:var(--gray); }
+
+    .action-btn {
+      background:none; border:none; cursor:pointer; padding:.25rem .5rem;
+      border-radius:4px; font-size:.78rem; color:var(--gray); transition:all .15s;
+    }
+    .action-btn:hover { background:var(--tan-lt); color:var(--dark); }
+    .action-btn.danger:hover { background:#fff5f5; color:#c53030; }
+
+    /* GRID 2COL */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem; }
+    @media(max-width:900px){ .grid-2 { grid-template-columns:1fr; } }
+
+    /* ACTIVITY FEED */
+    .activity-list { padding: .5rem 1.5rem 1rem; }
+    .activity-item {
+      display:flex; align-items:flex-start; gap:.85rem;
+      padding:.85rem 0; border-bottom:1px solid #f5f0ea;
+    }
+    .activity-item:last-child { border-bottom:none; }
+    .activity-dot {
+      width:34px; height:34px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center; font-size:.9rem;
+    }
+    .activity-text { flex:1; }
+    .activity-text strong { display:block; font-size:.88rem; color:var(--dark); }
+    .activity-text span   { font-size:.78rem; color:var(--gray-lt); }
+
+    /* PROFILE SECTION */
+    .profile-card {
+      background:#fff; border-radius:12px; border:1px solid #ede3d6; padding:2rem; margin-bottom:1.5rem;
+    }
+    .profile-header { display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem; }
+    .profile-avatar-lg {
+      width:72px; height:72px; border-radius:50%; background:var(--red);
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-size:2rem; font-weight:700; flex-shrink:0;
+    }
+    .profile-info h2 { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--dark); margin-bottom:.3rem; }
+    .profile-info p  { color:var(--gray); font-size:.88rem; }
+    .profile-form { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:600px){ .profile-form { grid-template-columns:1fr; } }
+    .pf-group label { display:block; font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--gray); margin-bottom:.4rem; }
+    .pf-group input, .pf-group select {
+      width:100%; padding:.65rem .85rem; border:1.5px solid var(--tan);
+      border-radius:7px; font-family:'Lato',sans-serif; font-size:.9rem;
+      color:var(--dark); background:#fff; outline:none; transition:border-color .2s;
+    }
+    .pf-group input:focus, .pf-group select:focus { border-color:var(--red); }
+
+    /* PERMISSIONS GRID */
+    .perms-grid { display:flex; flex-wrap:wrap; gap:.5rem; }
+    .perm-chip {
+      padding:.3rem .8rem; border-radius:6px;
+      font-size:.75rem; font-weight:700;
+      background:#f0fff4; color:#276749;
+      border: 1px solid #c6f6d5;
+    }
+
+    /* QUICK ACTIONS */
+    .quick-actions { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+    .qa-card {
+      background:#fff; border-radius:12px; border:1px solid #ede3d6;
+      padding:1.25rem; text-align:center; cursor:pointer;
+      transition:all .2s; text-decoration:none; display:block;
+    }
+    .qa-card:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,.08); border-color:var(--tan); }
+    .qa-icon { font-size:1.75rem; margin-bottom:.6rem; }
+    .qa-label { font-size:.82rem; font-weight:700; color:var(--dark); }
+
+    /* MOBILE */
+    .mobile-menu-btn {
+      display:none; position:fixed; top:1rem; left:1rem; z-index:200;
+      width:40px; height:40px; background:var(--dark); color:#fff;
+      border:none; border-radius:8px; cursor:pointer; font-size:1.1rem;
+    }
+    @media(max-width:768px){
+      .sidebar { transform:translateX(-100%); }
+      .sidebar.open { transform:translateX(0); }
+      .dash-main { margin-left:0; }
+      .mobile-menu-btn { display:flex; align-items:center; justify-content:center; }
+      .dash-content { padding:1rem; padding-top:4.5rem; }
+      .stats-grid { grid-template-columns:1fr 1fr; }
+    }
+
+    /* ALERT TOAST */
+    .toast {
+      position:fixed; bottom:1.5rem; right:1.5rem;
+      background:var(--dark); color:#fff;
+      padding:.85rem 1.25rem; border-radius:10px;
+      font-size:.88rem; max-width:320px;
+      box-shadow:0 8px 32px rgba(0,0,0,.3);
+      transform:translateY(100px); opacity:0;
+      transition:all .3s; z-index:999;
+    }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast.success { border-left:4px solid #48bb78; }
+    .toast.error   { border-left:4px solid var(--red); }
+  </style>
+</head>
+<body>
+
+<button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+<div class="toast" id="toast"></div>
+
+<div class="dash-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="manyattagrillogo.jpeg" alt="Manyatta Grill" />
+      <div class="sidebar-brand-text">
+        <div class="name">Manyatta Grill</div>
+        <div class="sub">Dashboard</div>
+      </div>
+    </div>
+
+    <div class="sidebar-user" id="sidebar-user">
+      <!-- populated by JS -->
+    </div>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- populated by JS based on role -->
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-logout" onclick="handleLogout()">
+        <span>🚪</span> <span>Sign Out</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+
+    <div class="dash-topbar">
+      <h1 id="page-title">Dashboard</h1>
+      <div class="topbar-actions">
+        <button class="topbar-notif" onclick="showToast('No new notifications','success')">
+          🔔 <span class="notif-dot"></span>
+        </button>
+        <a href="index.html" class="topbar-btn">← Back to Site</a>
+      </div>
+    </div>
+
+    <div class="dash-content">
+
+      <!-- ── ADMIN OVERVIEW ── -->
+      <div class="dash-panel" id="panel-overview">
+        <div class="stats-grid" id="stats-grid"></div>
+        <div class="grid-2">
+          <div class="dash-table-wrap">
+            <div class="dash-table-head">
+              <h3>Recent Reservations</h3>
+              <div class="table-actions">
+                <button class="tbl-btn" onclick="showPanel('panel-reservations')">View All</button>
+              </div>
+            </div>
+            <table>
+              <thead><tr><th>Guest</th><th>Date</th><th>Guests</th><th>Status</th></tr></thead>
+              <tbody id="recent-reservations"></tbody>
+            </table>
+          </div>
+          <div class="dash-table-wrap">
+            <div class="dash-table-head"><h3>Recent Activity</h3></div>
+            <div class="activity-list" id="activity-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── USER MANAGEMENT (ADMIN) ── -->
+      <div class="dash-panel" id="panel-users">
+        <div class="dash-table-wrap">
+          <div class="dash-table-head">
+            <h3>User Management</h3>
+            <div class="table-actions">
+              <button class="tbl-btn primary" onclick="showToast('Invite feature coming soon','success')">+ Invite User</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Last Login</th><th>Actions</th></tr></thead>
+            <tbody id="users-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── RESERVATIONS ── -->
+      <div class="dash-panel" id="panel-reservations">
+        <div class="dash-table-wrap">
+          <div class="dash-table-head">
+            <h3>Reservations</h3>
+            <div class="table-actions">
+              <button class="tbl-btn primary" onclick="showToast('New reservation form coming soon','success')">+ New</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Guest</th><th>Date &amp; Time</th><th>Party</th><th>Table</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="reservations-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── MENU MANAGEMENT ── -->
+      <div class="dash-panel" id="panel-menu">
+        <div class="quick-actions">
+          <a class="qa-card" href="menu.html" target="_blank"><div class="qa-icon">🍖</div><div class="qa-label">View Live Menu</div></a>
+          <div class="qa-card" onclick="showToast('Menu editor coming soon','success')"><div class="qa-icon">✏️</div><div class="qa-label">Edit Items</div></div>
+          <div class="qa-card" onclick="showToast('Categories editor coming soon','success')"><div class="qa-icon">📂</div><div class="qa-label">Categories</div></div>
+          <div class="qa-card" onclick="showToast('Pricing tool coming soon','success')"><div class="qa-icon">💰</div><div class="qa-label">Update Pricing</div></div>
+        </div>
+        <div class="dash-table-wrap">
+          <div class="dash-table-head"><h3>Menu Items</h3></div>
+          <table>
+            <thead><tr><th>Item</th><th>Category</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="menu-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── REPORTS ── -->
+      <div class="dash-panel" id="panel-reports">
+        <div class="stats-grid">
+          <div class="stat-card" style="--accent:#48bb78"><div class="stat-icon">💰</div><div class="stat-label">Monthly Revenue</div><div class="stat-value">KSh 847K</div><div class="stat-delta">↑ 12% vs last month</div></div>
+          <div class="stat-card" style="--accent:#4299e1"><div class="stat-icon">👥</div><div class="stat-label">New Customers</div><div class="stat-value">184</div><div class="stat-delta">↑ 8% vs last month</div></div>
+          <div class="stat-card" style="--accent:#ed8936"><div class="stat-icon">⭐</div><div class="stat-label">Avg Rating</div><div class="stat-value">4.8</div><div class="stat-delta">↑ 0.2 vs last month</div></div>
+          <div class="stat-card" style="--accent:#9f7aea"><div class="stat-icon">🍽️</div><div class="stat-label">Covers Served</div><div class="stat-value">2,340</div><div class="stat-delta">↑ 5% vs last month</div></div>
+        </div>
+        <div class="dash-table-wrap">
+          <div class="dash-table-head"><h3>Top Menu Items This Month</h3></div>
+          <table>
+            <thead><tr><th>Item</th><th>Orders</th><th>Revenue</th><th>Rating</th></tr></thead>
+            <tbody>
+              <tr><td>🥩 Nyama Choma (1kg)</td><td>312</td><td>KSh 124,800</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>🍗 Kuku Choma</td><td>248</td><td>KSh 74,400</td><td>⭐⭐⭐⭐⭐</td></tr>
+              <tr><td>🌽 Ugali + Sukuma</td><td>198</td><td>KSh 29,700</td><td>⭐⭐⭐⭐</td></tr>
+              <tr><td>🍺 Tusker Lager</td><td>445</td><td>KSh 66,750</td><td>⭐⭐⭐⭐⭐</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── REVIEWS ── -->
+      <div class="dash-panel" id="panel-reviews">
+        <div class="dash-table-wrap">
+          <div class="dash-table-head"><h3>Customer Reviews</h3></div>
+          <table>
+            <thead><tr><th>Customer</th><th>Rating</th><th>Comment</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>Jane W.</td><td>⭐⭐⭐⭐⭐</td><td>"Best nyama choma in Nairobi!"</td><td>Jun 1, 2026</td><td><span class="badge badge-green">Published</span></td><td><button class="action-btn">Archive</button></td></tr>
+            <tr><td>Mike O.</td><td>⭐⭐⭐⭐</td><td>"Great ambiance, food was excellent"</td><td>May 28</td><td><span class="badge badge-amber">Pending</span></td><td><button class="action-btn" onclick="showToast('Review approved!','success')">Approve</button></td></tr>
+            <tr><td>Amina K.</td><td>⭐⭐⭐</td><td>"Good but a bit slow service"</td><td>May 25</td><td><span class="badge badge-amber">Pending</span></td><td><button class="action-btn" onclick="showToast('Review approved!','success')">Approve</button></td></tr>
+          </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── MY PROFILE ── -->
+      <div class="dash-panel" id="panel-profile">
+        <div class="profile-card" id="profile-card"></div>
+        <div class="dash-table-wrap">
+          <div class="dash-table-head"><h3>My Permissions</h3></div>
+          <div style="padding:1.25rem 1.5rem">
+            <div class="perms-grid" id="perms-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MY RESERVATIONS (CUSTOMER) ── -->
+      <div class="dash-panel" id="panel-my-reservations">
+        <div class="dash-table-wrap">
+          <div class="dash-table-head">
+            <h3>My Reservations</h3>
+            <div class="table-actions">
+              <a href="reservations.html" class="tbl-btn primary">+ Book a Table</a>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Date</th><th>Time</th><th>Guests</th><th>Special Request</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Jun 15, 2026</td><td>7:00 PM</td><td>4</td><td>Window seat</td><td><span class="badge badge-green">Confirmed</span></td></tr>
+              <tr><td>May 20, 2026</td><td>6:30 PM</td><td>2</td><td>Anniversary</td><td><span class="badge badge-gray">Completed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── API TESTER (ALL ROLES) ── -->
+      <div class="dash-panel" id="panel-api">
+        <div class="dash-table-wrap">
+          <div class="dash-table-head"><h3>🔐 Secure API Tester</h3></div>
+          <div style="padding:1.5rem">
+            <p style="color:var(--gray);font-size:.88rem;margin-bottom:1.25rem">All API requests are sent with your JWT Bearer token and role headers. Open the browser console to see full request details.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem">
+              <button class="tbl-btn" onclick="testApi('GET','/api/menu')">GET /api/menu</button>
+              <button class="tbl-btn" onclick="testApi('GET','/api/reservations')">GET /api/reservations</button>
+              <button class="tbl-btn" onclick="testApi('POST','/api/reservations')">POST /api/reservations</button>
+              <button class="tbl-btn" onclick="testApi('GET','/api/users')">GET /api/users</button>
+              <button class="tbl-btn" onclick="testApi('PUT','/api/menu/item')">PUT /api/menu/item</button>
+              <button class="tbl-btn" onclick="testApi('DELETE','/api/review')">DELETE /api/review</button>
+            </div>
+            <div id="api-log" style="background:#1A1208;border-radius:8px;padding:1rem;font-family:monospace;font-size:.78rem;color:#e8d5b0;min-height:120px;max-height:280px;overflow-y:auto;white-space:pre-wrap;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </main>
+</div>
+
+<script src="auth.js"></script>
+<script>
+  /* ── INIT ── */
+  const user = ManyattaAuth.requireAuth();
+  if (!user) throw new Error('Redirecting to login...');
+
+  /* ── NAV CONFIG BY ROLE ── */
+  const NAV_CONFIG = {
+    ADMIN: [
+      { section: 'Main' },
+      { id:'overview',    icon:'📊', label:'Overview',      panel:'panel-overview' },
+      { id:'reports',     icon:'📈', label:'Reports',       panel:'panel-reports'  },
+      { section: 'Management' },
+      { id:'users',       icon:'👥', label:'Users',         panel:'panel-users',    badge:'3' },
+      { id:'reservations',icon:'🗓️', label:'Reservations',  panel:'panel-reservations' },
+      { id:'menu',        icon:'🍖', label:'Menu',          panel:'panel-menu'     },
+      { id:'reviews',     icon:'⭐', label:'Reviews',       panel:'panel-reviews', badge:'2' },
+      { section: 'Dev Tools' },
+      { id:'api',         icon:'🔐', label:'API Tester',    panel:'panel-api'      },
+      { section: 'Account' },
+      { id:'profile',     icon:'👤', label:'My Profile',    panel:'panel-profile'  },
+    ],
+    STAFF: [
+      { section: 'Main' },
+      { id:'overview',    icon:'📊', label:'Overview',      panel:'panel-overview' },
+      { id:'reports',     icon:'📈', label:'Reports',       panel:'panel-reports'  },
+      { section: 'Operations' },
+      { id:'reservations',icon:'🗓️', label:'Reservations',  panel:'panel-reservations' },
+      { id:'reviews',     icon:'⭐', label:'Reviews',       panel:'panel-reviews', badge:'2' },
+      { id:'api',         icon:'🔐', label:'API Tester',    panel:'panel-api'      },
+      { section: 'Account' },
+      { id:'profile',     icon:'👤', label:'My Profile',    panel:'panel-profile'  },
+    ],
+    CUSTOMER: [
+      { section: 'My Account' },
+      { id:'my-reservations', icon:'🗓️', label:'My Reservations', panel:'panel-my-reservations' },
+      { id:'api',             icon:'🔐', label:'API Tester',       panel:'panel-api'      },
+      { id:'profile',         icon:'👤', label:'My Profile',       panel:'panel-profile'  },
+    ],
+  };
+
+  /* ── BUILD SIDEBAR ── */
+  function buildSidebar() {
+    // User info
+    const initials = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('sidebar-user').innerHTML = `
+      <div class="sidebar-avatar">${initials}</div>
+      <div class="sidebar-user-info">
+        <div class="user-name">${user.name}</div>
+        <span class="user-role role-pill-${user.role}">${user.role}</span>
+      </div>`;
+
+    const nav = document.getElementById('sidebar-nav');
+    nav.innerHTML = '';
+    const items = NAV_CONFIG[user.role] || NAV_CONFIG.CUSTOMER;
+    items.forEach(item => {
+      if (item.section) {
+        nav.innerHTML += `<div class="sidebar-section">${item.section}</div>`;
+      } else {
+        nav.innerHTML += `
+          <div class="sidebar-link" id="nav-${item.id}" onclick="showPanel('${item.panel}','${item.id}')">
+            <span class="icon">${item.icon}</span>
+            <span>${item.label}</span>
+            ${item.badge ? `<span class="badge">${item.badge}</span>` : ''}
+          </div>`;
+      }
+    });
+  }
+
+  /* ── SHOW PANEL ── */
+  function showPanel(panelId, navId) {
+    document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+
+    const panel = document.getElementById(panelId);
+    if (panel) panel.classList.add('active');
+    if (navId) {
+      const link = document.getElementById(`nav-${navId}`);
+      if (link) link.classList.add('active');
+    }
+
+    const labels = { 'panel-overview':'Overview', 'panel-users':'User Management', 'panel-reservations':'Reservations', 'panel-menu':'Menu', 'panel-reports':'Reports', 'panel-reviews':'Reviews', 'panel-profile':'My Profile', 'panel-api':'API Tester', 'panel-my-reservations':'My Reservations' };
+    document.getElementById('page-title').textContent = labels[panelId] || 'Dashboard';
+
+    if (window.innerWidth <= 768) closeSidebar();
+  }
+
+  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+  function closeSidebar()   { document.getElementById('sidebar').classList.remove('open'); }
+
+  /* ── POPULATE OVERVIEW STATS ── */
+  function populateOverview() {
+    const statsGrid = document.getElementById('stats-grid');
+    const statsData = user.role === 'CUSTOMER'
+      ? [
+          { label:'My Reservations', value:'2', delta:'1 upcoming', accent:'#D94F2B', icon:'🗓️' },
+          { label:'Points Earned',   value:'420', delta:'↑ 20 this month', accent:'#48bb78', icon:'⭐' },
+          { label:'Reviews Written', value:'3',  delta:'2 published', accent:'#4299e1', icon:'✍️' },
+          { label:'Member Since',    value:'2024', delta:'Bronze Member', accent:'#ed8936', icon:'🥉' },
+        ]
+      : [
+          { label:'Total Reservations', value:'124', delta:'↑ 18% this week', accent:'#D94F2B', icon:'🗓️' },
+          { label:'Active Users',       value:'347', delta:'↑ 12 today', accent:'#48bb78', icon:'👥' },
+          { label:'Revenue Today',      value:'KSh 42K', delta:'↑ 8% vs yesterday', accent:'#4299e1', icon:'💰' },
+          { label:'Avg Table Time',     value:'68 min', delta:'↓ 4 min optimized', accent:'#ed8936', icon:'⏱️' },
+        ];
+    statsGrid.innerHTML = statsData.map(s => `
+      <div class="stat-card" style="--accent:${s.accent}">
+        <div class="stat-icon">${s.icon}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-delta">${s.delta}</div>
+      </div>`).join('');
+
+    // Recent reservations
+    const resos = [
+      { guest:'Wanjiru M.', date:'Jun 7 · 7PM', size:4, status:'confirmed' },
+      { guest:'Kamau P.',   date:'Jun 7 · 8PM', size:2, status:'pending'   },
+      { guest:'Aisha N.',   date:'Jun 8 · 6PM', size:6, status:'confirmed' },
+      { guest:'Daniel O.',  date:'Jun 8 · 7:30PM', size:3, status:'cancelled'},
+    ];
+    document.getElementById('recent-reservations').innerHTML = resos.map(r => `
+      <tr>
+        <td>${r.guest}</td>
+        <td>${r.date}</td>
+        <td>${r.size} guests</td>
+        <td><span class="badge ${r.status==='confirmed'?'badge-green':r.status==='pending'?'badge-amber':'badge-red'}">${r.status}</span></td>
+      </tr>`).join('');
+
+    // Activity feed
+    const acts = [
+      { icon:'🎉', bg:'#f0fff4', text:'New reservation by Wanjiru M.', time:'2 min ago' },
+      { icon:'⭐', bg:'#fffbeb', text:'Review approved: "Amazing food!"', time:'15 min ago' },
+      { icon:'👤', bg:'#ebf8ff', text:'New user registered: Daniel O.', time:'1 hr ago' },
+      { icon:'🍖', bg:'#fff5f5', text:'Menu item updated: Nyama Choma', time:'3 hr ago' },
+    ];
+    document.getElementById('activity-list').innerHTML = acts.map(a => `
+      <div class="activity-item">
+        <div class="activity-dot" style="background:${a.bg}">${a.icon}</div>
+        <div class="activity-text"><strong>${a.text}</strong><span>${a.time}</span></div>
+      </div>`).join('');
+  }
+
+  /* ── POPULATE USERS TABLE ── */
+  function populateUsers() {
+    if (!ManyattaAuth.hasPermission('manage_users')) return;
+    const result = ManyattaAuth.getUsers();
+    if (!result.ok) return;
+    const tbody = document.getElementById('users-table-body');
+    tbody.innerHTML = result.users.map(u => {
+      const initials = u.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+      const roleColors = { ADMIN:'badge-red', STAFF:'badge-amber', CUSTOMER:'badge-green' };
+      const joined = new Date(u.createdAt).toLocaleDateString('en-KE',{month:'short',day:'numeric',year:'numeric'});
+      const lastLogin = u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('en-KE',{month:'short',day:'numeric'}) : 'Never';
+      return `<tr>
+        <td><div style="display:flex;align-items:center;gap:.6rem">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;flex-shrink:0">${initials}</div>
+          <div><strong style="font-size:.88rem">${u.name}</strong></div>
+        </div></td>
+        <td style="color:var(--gray);font-size:.83rem">${u.email}</td>
+        <td><span class="badge ${roleColors[u.role]||'badge-gray'}">${u.role}</span></td>
+        <td style="color:var(--gray-lt);font-size:.82rem">${joined}</td>
+        <td style="color:var(--gray-lt);font-size:.82rem">${lastLogin}</td>
+        <td>
+          <select class="action-btn" style="padding:.3rem .5rem;border:1px solid var(--tan);border-radius:4px;font-size:.75rem;cursor:pointer" onchange="changeRole('${u.id}',this.value)">
+            <option value="CUSTOMER" ${u.role==='CUSTOMER'?'selected':''}>Customer</option>
+            <option value="STAFF"    ${u.role==='STAFF'?'selected':''}>Staff</option>
+            <option value="ADMIN"    ${u.role==='ADMIN'?'selected':''}>Admin</option>
+          </select>
+          <button class="action-btn danger" onclick="deleteUser('${u.id}')">🗑</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  function changeRole(userId, newRole) {
+    const res = ManyattaAuth.updateUserRole(userId, newRole);
+    if (res.ok) { showToast(`Role updated to ${newRole}`,'success'); populateUsers(); }
+    else showToast(res.error,'error');
+  }
+  function deleteUser(userId) {
+    if (!confirm('Delete this user?')) return;
+    const res = ManyattaAuth.deleteUser(userId);
+    if (res.ok) { showToast('User deleted','success'); populateUsers(); }
+    else showToast(res.error,'error');
+  }
+
+  /* ── POPULATE MENU ── */
+  function populateMenu() {
+    const items = [
+      { name:'🥩 Nyama Choma (1kg)', cat:'Grills',    price:'KSh 400', status:'active' },
+      { name:'🍗 Kuku Choma',         cat:'Grills',    price:'KSh 300', status:'active' },
+      { name:'🌽 Ugali + Sukuma Wiki', cat:'Sides',    price:'KSh 150', status:'active' },
+      { name:'🫘 Mutura',             cat:'Starters',  price:'KSh 80',  status:'active' },
+      { name:'🍺 Tusker Lager',        cat:'Drinks',   price:'KSh 150', status:'active' },
+      { name:'🧃 Freshly Squeezed',    cat:'Drinks',   price:'KSh 180', status:'inactive' },
+    ];
+    document.getElementById('menu-body').innerHTML = items.map(i => `
+      <tr>
+        <td>${i.name}</td>
+        <td><span class="badge badge-blue">${i.cat}</span></td>
+        <td>${i.price}</td>
+        <td><span class="badge ${i.status==='active'?'badge-green':'badge-gray'}">${i.status}</span></td>
+        <td>
+          <button class="action-btn" onclick="showToast('Edit mode coming soon','success')">✏️ Edit</button>
+          <button class="action-btn danger" onclick="showToast('Item removed','error')">🗑</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  /* ── POPULATE PROFILE ── */
+  function populateProfile() {
+    const initials = user.name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    const roleColors = { ADMIN:'#D94F2B', STAFF:'#8B6914', CUSTOMER:'#4A7C59' };
+    document.getElementById('profile-card').innerHTML = `
+      <div class="profile-header">
+        <div class="profile-avatar-lg" style="background:${roleColors[user.role]||'var(--red)'}">${initials}</div>
+        <div class="profile-info">
+          <h2>${user.name}</h2>
+          <p>${user.email} &nbsp;·&nbsp; <strong>${user.role}</strong> &nbsp;·&nbsp; Member since ${new Date(user.createdAt).getFullYear()}</p>
+        </div>
+      </div>
+      <div class="profile-form">
+        <div class="pf-group"><label>Full Name</label><input type="text" value="${user.name}" /></div>
+        <div class="pf-group"><label>Email</label><input type="email" value="${user.email}" /></div>
+        <div class="pf-group"><label>Phone</label><input type="tel" value="${user.phone||''}" placeholder="+254 7XX XXX XXX" /></div>
+        <div class="pf-group"><label>Role</label><input type="text" value="${user.role}" disabled style="background:#f5f0ea;color:var(--gray)" /></div>
+      </div>
+      <div style="margin-top:1.25rem">
+        <button class="tbl-btn primary" onclick="showToast('Profile updated successfully!','success')">Save Changes</button>
+        &nbsp;
+        <button class="tbl-btn" onclick="showPanel('panel-reset-pw','')">Change Password</button>
+      </div>`;
+
+    document.getElementById('perms-grid').innerHTML = (user.permissions||[]).map(p =>
+      `<span class="perm-chip">${p.replace(/_/g,' ')}</span>`).join('');
+  }
+
+  /* ── API TESTER ── */
+  async function testApi(method, endpoint) {
+    const log = document.getElementById('api-log');
+    log.textContent += `\n> ${method} ${endpoint}\n  Sending request with JWT Bearer token…\n`;
+
+    const result = await ManyattaAuth.apiRequest(endpoint, { method });
+
+    if (result.ok) {
+      log.textContent += `  ✅ ${result.status} OK\n`;
+      log.textContent += `  Auth: Bearer ${result.headers?.Authorization?.substring(7,27)}…\n`;
+      log.textContent += `  Role: ${result.headers?.['X-User-Role']}\n`;
+      log.textContent += `  Request-ID: ${result.headers?.['X-Request-ID']}\n`;
+      log.textContent += `  Timestamp: ${result.timestamp}\n`;
+    } else {
+      log.textContent += `  ❌ Error: ${result.error}\n`;
+    }
+    log.scrollTop = log.scrollHeight;
+  }
+
+  /* ── TOAST ── */
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  /* ── LOGOUT ── */
+  function handleLogout() {
+    ManyattaAuth.logout();
+    window.location.href = 'login.html';
+  }
+
+  /* ── BOOTSTRAP ── */
+  buildSidebar();
+  populateOverview();
+  populateProfile();
+  if (ManyattaAuth.hasPermission('manage_users')) populateUsers();
+  if (ManyattaAuth.hasPermission('manage_menu'))  populateMenu();
+
+  // Default panel
+  const defaultNav = NAV_CONFIG[user.role]?.[1]; // skip section header
+  const firstNav = (NAV_CONFIG[user.role]||[]).find(i => i.panel);
+  if (firstNav) showPanel(firstNav.panel, firstNav.id);
+</script>
+</body>
+</html>
